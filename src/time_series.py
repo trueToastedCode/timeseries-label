@@ -110,9 +110,13 @@ class TimeSeries:
             or previous_slide.stop != next_slide.start
         ):
             slide = Slide(i, i + 1, len(self.adj_arr), self, 0)
-            self.slides.append(slide)
+            if next_slide is None:
+                self.slides.append(slide)
+            else:
+                self.slides.insert(self.slides.index(next_slide), slide)
             slide.drag_status = Slide.DRAG_MODE_STOP
             return slide
+
 
     def rm_slide(self):
         i = self.calc_idx_from_left_not_round(pygame.mouse.get_pos()[0])
