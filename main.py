@@ -14,8 +14,9 @@ HOR_BAR_SIZE = SIZE[0], 30
 HOR_BAR_POS = 0, SIZE[1] - HOR_BAR_SIZE[1]
 TIME_SERIES_SIZE = SIZE[0], SIZE[1] - HOR_BAR_SIZE[1]
 TIME_SERIES_POS = 0, 0
-BETWEEN = 50
-MOUSE_DRAG_MAX_DISTANCE = 18
+
+between = 25
+between_update = max(round(between * 0.05), 1)
 
 
 if __name__ == '__main__':
@@ -24,8 +25,8 @@ if __name__ == '__main__':
     need_update = True
     mouse_drag_target = None
 
-    hor_bar = HorBar(HOR_BAR_SIZE, HOR_BAR_POS, BETWEEN, len(arr))
-    time_series = TimeSeries(TIME_SERIES_SIZE, TIME_SERIES_POS, BETWEEN, arr, hor_bar, None, classes_colors)
+    hor_bar = HorBar(HOR_BAR_SIZE, HOR_BAR_POS, lambda: between, len(arr))
+    time_series = TimeSeries(TIME_SERIES_SIZE, TIME_SERIES_POS, lambda: between, arr, hor_bar, None, classes_colors)
 
     while running:
         for event in pygame.event.get():
@@ -53,6 +54,16 @@ if __name__ == '__main__':
                 case pygame.KEYDOWN:
                     if keys[pygame.K_s]:
                         time_series.save_indices(save_file)
+                    elif keys[pygame.K_MINUS]:
+                        need_update = True
+                        between = max(between - between_update, 1)
+                        hor_bar.update_between()
+                        time_series.update_between()
+                    elif keys[pygame.K_PLUS]:
+                        need_update = True
+                        between += between_update
+                        hor_bar.update_between()
+                        time_series.update_between()
 
         if mouse_drag_target is not None:
             need_update = need_update or mouse_drag_target.update_drag(pygame.mouse.get_pos())

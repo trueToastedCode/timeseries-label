@@ -5,16 +5,24 @@ from src.calcs import is_pos_in_rect, calc_distance_pos_rect
 
 
 class HorBar(Draggable):
-    def __init__(self, size, abs_pos, between, value_count):
+    def __init__(self, size, abs_pos, get_between, value_count):
         self.size = size
-        self.hor_bar_slider_size = \
-            min((((self.size[0] // between) + 1) / value_count) * self.size[0], size[0]), \
-            self.size[1]
-        self.hor_bar_max_offset = max(self.size[0] - self.hor_bar_slider_size[0], 0)
         self.last_pos = None
         self.surface = pygame.Surface(size)
         self.abs_pos = abs_pos
         self.slider_offset = 0
+        self.get_between = get_between
+        self.value_count = value_count
+        self.hor_bar_slider_size = None
+        self.hor_bar_max_offset = None
+        self.update_between()
+
+    def update_between(self):
+        self.hor_bar_slider_size = \
+            min((((self.size[0] // self.get_between()) + 1) / self.value_count) * self.size[0], self.size[0]), \
+                self.size[1]
+        self.hor_bar_max_offset = max(self.size[0] - self.hor_bar_slider_size[0], 0)
+        self.slider_offset = min(self.slider_offset, self.hor_bar_max_offset)
 
     def get_rect(self):
         return self.slider_offset, 0, *self.hor_bar_slider_size

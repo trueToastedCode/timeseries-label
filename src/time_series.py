@@ -6,11 +6,9 @@ from src.slide import Slide
 
 
 class TimeSeries:
-    def __init__(self, size, abs_pos, between, arr, hor_bar, slides, classes_colors):
+    def __init__(self, size, abs_pos, get_between, arr, hor_bar, slides, classes_colors):
         self.size = size
         self.abs_pos = abs_pos
-        self.values_stop_offset = (size[0] // between) + 2
-        self.max_x_offset = max((len(arr) - (size[0] // between) - 1) * between, 0)
         self.surface = pygame.Surface(size)
         self.surface_slides = pygame.Surface(size, pygame.SRCALPHA)
         self.surface_slides.set_alpha(round(0.2 * 255))
@@ -20,31 +18,38 @@ class TimeSeries:
         self.adj_arr = (arr / arr.max()) * size[1]
         self.adj_arr = self.size[1] - self.adj_arr
         self.hor_bar = hor_bar
-        self.between = between
+        self.get_between = get_between
         self.slides = slides or []
-        self.update_x_offset()
         self.classes_colors = classes_colors
+        self.x_offset = None
+        self.values_stop_offset = None
+        self.max_x_offset = None
+        self.update_between()
+
+    def update_between(self):
+        self.values_stop_offset = (self.size[0] // self.get_between()) + 2
+        self.max_x_offset = (len(self.adj_arr) - self.values_stop_offset + 1) * self.get_between()
 
     def calc_left_from_idx(self, idx):
-        return idx * self.between - self.x_offset
+        return idx * self.get_between() - self.x_offset
 
     def calc_abs_left_from_idx(self, idx):
-        return self.abs_pos[0] + idx * self.between - self.x_offset
+        return self.abs_pos[0] + idx * self.get_between() - self.x_offset
 
     def update_x_offset(self):
         self.x_offset = (self.hor_bar.slider_offset / self.hor_bar.hor_bar_max_offset) * self.max_x_offset \
             if self.hor_bar.hor_bar_max_offset else 0
 
     def calc_idx_from_left(self, left, adj_func=round):
-        return adj_func((left + self.x_offset) / self.between)
+        return adj_func((left + self.x_offset) / self.get_between())
 
     def calc_idx_from_left_not_round(self, left):
-        return (left + self.x_offset) / self.between
+        return (left + self.x_offset) / self.get_between()
 
     def blit(self, screen):
         self.surface.fill((23, 27, 33))
         self.update_x_offset()
-        start = math.floor(self.x_offset / self.between)
+        start = math.floor(self.x_offset / self.get_between())
         stop = min(start + self.values_stop_offset, len(self.adj_arr))
         adj_arr = self.adj_arr[start : stop]
         pygame.draw.circle(
@@ -91,6 +96,8 @@ class TimeSeries:
 
     def add_slide(self):
         i = self.calc_idx_from_left(pygame.mouse.get_pos()[0], math.floor)
+        if i + 1 >= len(self.adj_arr):
+            return
         try:
             next(slide for slide in self.slides if slide.start <= i < slide.stop)
             return
@@ -116,7 +123,6 @@ class TimeSeries:
                 self.slides.insert(self.slides.index(next_slide), slide)
             slide.drag_status = Slide.DRAG_MODE_STOP
             return slide
-
 
     def rm_slide(self):
         i = self.calc_idx_from_left_not_round(pygame.mouse.get_pos()[0])

@@ -144,7 +144,7 @@ class Slide(Draggable):
                     return True
             self.stop = max(stop, self.start + 1)
         else:
-            offset = round((pos[0] - self.start_pos[0]) / self.time_series.between)
+            offset = round((pos[0] - self.start_pos[0]) / self.time_series.get_between())
             if offset > 0:
                 stop = max(min(self.start_stop + offset, len(self.time_series.adj_arr) - 1), 0)
                 next_slide = self.time_series.get_next_slide(self)
