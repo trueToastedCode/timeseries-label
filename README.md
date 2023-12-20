@@ -13,3 +13,5 @@ A very simple tool to label a one-dimensional time series with non-overlapping c
 |Left-click and hold on label's end|Move label's end|
 |Left-click and hold on label's start|Move label's start|
 |Left-click and hold on a label|Move the entire label|
+|'+'|Increase horizontal scaling|
+|'-'|Decrease horizontal scaling|
