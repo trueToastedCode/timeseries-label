@@ -36,7 +36,7 @@ class HorBar(Draggable):
 
     def update_drag(self, pos):
         if self.last_pos is None:
-            return
+            return False
         slider_offset = min(max(self.slider_offset + (pos[0] - self.last_pos[0]), 0), self.hor_bar_max_offset)
         self.last_pos = pos
         if slider_offset == self.slider_offset:
